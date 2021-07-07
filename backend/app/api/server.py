@@ -20,6 +20,7 @@ def get_application():
     About cors You can read more here: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
     """
 
+    #TODO read about middleware and all allows things below
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
