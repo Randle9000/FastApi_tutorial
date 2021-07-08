@@ -1,3 +1,5 @@
+
+# docker setup is derived from TestDriven.io tutorial https://testdriven.io/blog/fastapi-crud/
 # get slim-buster image for python3.8
 FROM python:3.8-slim-buster
 
