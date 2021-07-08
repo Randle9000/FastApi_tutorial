@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  #tell to build using dockerfile
+  server:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    #save the backend files to volume (More later)
+    volumes:
+      - ./backend/:/backend/
+    command: uvicorn app.api.server:app --reload --workers 1 --host 0.0.0.0 --port 8000
+    #all other files taked from .venv
+    env_file:
+      - ./backend/.env
+    ports:
+      - 8000:8000
