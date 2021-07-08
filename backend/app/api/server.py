@@ -11,14 +11,12 @@ from fastapi.middleware.cors import CORSMiddleware
 But developers from FastAPI created the interface for the most of the starlette interface
 so we can import it directly from fastapi
 """
-
+from app.core import config, tasks
 from app.api.routes import router as api_router
 
 
 def get_application():
-
-
-    app = FastAPI(title="Phresh", version="1.0.0")
+    app = FastAPI(title=config.PROJECT_NAME, version=config.VERSION)
     """ 
     This is a factory functions which returns FastAppi app with cors middleware configured 
     About cors You can read more here: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
@@ -32,6 +30,9 @@ def get_application():
         allow_methods=["*"],
         allow_headers=["*"]
     )
+    #register event handlers for db
+    app.add_event_handler("startup", tasks.create_start_app_handlers(app))
+    app.add_event_handler("shutdown", tasks.create_stop_app_handler(app))
 
     app.include_router(api_router, prefix="/api")
 
