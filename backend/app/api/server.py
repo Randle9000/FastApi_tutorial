@@ -31,7 +31,7 @@ def get_application():
         allow_headers=["*"]
     )
     #register event handlers for db
-    app.add_event_handler("startup", tasks.create_start_app_handlers(app))
+    app.add_event_handler("startup", tasks.create_start_app_handlers(app)) # 'startup' means that this handler will be executed when the application starts
     app.add_event_handler("shutdown", tasks.create_stop_app_handler(app))
 
     app.include_router(api_router, prefix="/api")
