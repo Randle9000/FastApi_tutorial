@@ -12,6 +12,9 @@ But developers from FastAPI created the interface for the most of the starlette 
 so we can import it directly from fastapi
 """
 
+from app.api.routes import router as api_router
+
+
 def get_application():
 
 
@@ -29,6 +32,8 @@ def get_application():
         allow_methods=["*"],
         allow_headers=["*"]
     )
+
+    app.include_router(api_router, prefix="/api")
 
     return app
 

@@ -10,7 +10,7 @@ services:
     volumes:
       - ./backend/:/backend/
     command: uvicorn app.api.server:app --reload --workers 1 --host 0.0.0.0 --port 8000
-    #all other files taked from .venv
+    #all other environment variables taken from .env file
     env_file:
       - ./backend/.env
     ports:
