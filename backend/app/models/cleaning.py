@@ -37,6 +37,7 @@ class CleaningBase(CoreModel):
     cleaning_type: Optional[CleaningType] = "spot_clean" # here the default value is 'spot_clean'
 
 
+# intheriths from CleaningBase and CleaningBase from CoreBase and CoreBase from BaseModel of pedantic
 class CleaningCreate(CleaningBase):
     """
     The inheritance expand the values of that model/class,
