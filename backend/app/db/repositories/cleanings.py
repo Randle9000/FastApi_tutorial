@@ -8,7 +8,7 @@ CREATE_CLEANING_QUERY = """
 """
 
 
-class CleaningRepository(BaseRepository):
+class CleaningsRepository(BaseRepository):
     """
     All databases actions associated with the Cleaning resource
     """
