@@ -28,6 +28,12 @@ async def get_all_cleanings() -> List[dict]: # -> List[dicts] shows what type is
 
 
 """
+The first of two path parameters in our create_new_cleaning function, new_cleaning, 
+is annotated with the CleaningCreate type. 
+By default, FastAPI expects the body of a post request directly. 
+If we want it to expect JSON with a key new_cleaning and inside of it the model contents,
+ we use the special Body parameter embed in the parameter default.
+
 By simply specifying the CleaningCreate Python type declaration for new_cleaning, FastAPI will:
 
     Read the body of the request as JSON.
