@@ -33,7 +33,7 @@ class CleaningBase(CoreModel):
     """
     name: Optional[str]
     description: Optional[str]
-    price: Optional[str]
+    price: Optional[float]
     cleaning_type: Optional[CleaningType] = "spot_clean" # here the default value is 'spot_clean'
 
 
@@ -52,19 +52,18 @@ class CleaningCreate(CleaningBase):
     """
     # each value passsed as name will be for coerced to be str (in that case)
     name: str
-    # as above, but now we will deal with float.
     price: float
 
 
 class CleaningUpdate(CleaningBase):
-    cleaning_type = Optional[CleaningType]
+    cleaning_type: Optional[CleaningType]
 
 
-class CleaningInDB(IDModelMixin, CleaningType): # ID is inherited from IDModelMixin
+class CleaningInDB(IDModelMixin, CleaningBase):
     name: str
     price: float
     cleaning_type: CleaningType
 
 
-class CLeaningPublic(IDModelMixin, CleaningBase):
+class CleaningPublic(IDModelMixin, CleaningBase):
     pass
