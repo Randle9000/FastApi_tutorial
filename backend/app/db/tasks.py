@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from databases import Database # to establish connection to postgresql with the db url string in config.py
 from app.core.config import DATABASE_URL
@@ -7,7 +8,8 @@ logger = logging.getLogger(__name__)
 
 
 async def connect_to_db(app: FastAPI) -> None:
-    database = Database(DATABASE_URL, min_size=2, max_size=10) # minimum and maximum number of connections at given time, can be also added to config.py
+    DB_URL = f"{DATABASE_URL}_test" if os.environ.get("TESTING") else DATABASE_URL
+    database = Database(DB_URL, min_size=2, max_size=10) # minimum and maximum number of connections at given time, can be also added to config.py
 
     try:
         await database.connect()
