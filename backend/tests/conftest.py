@@ -11,6 +11,8 @@ from databases import Database
 import alembic
 from alembic.config import Config
 
+from app.models.cleaning import CleaningCreate, CleaningInDB
+from app.db.repositories.cleanings import CleaningsRepository
 
 # Apply migrations at beginning and end of testing session
 @pytest.fixture(scope="session")
@@ -48,3 +50,15 @@ async def client(app: FastAPI) -> AsyncClient:
             headers={"Content-Type": "application/json"}
         ) as client:
             yield client
+
+
+@pytest.fixture
+async def test_cleaning(db: Database) -> CleaningInDB:
+    cleaning_repo = CleaningsRepository(db)
+    new_cleaning = CleaningCreate(
+        name="fake cleaning name",
+        description="fake cleaning description",
+        price=9.99,
+        cleaning_type="spot_clean",
+    )
+    return await cleaning_repo.create_cleaning(new_cleaning=new_cleaning)
