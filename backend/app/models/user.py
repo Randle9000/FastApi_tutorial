@@ -31,23 +31,29 @@ class UserCreate(CoreModel):
     """
     email: EmailStr
     password: constr(min_length=7, max_length=100)
-    username: str
+    username: constr(min_length=3, regex="^[a-zA-Z0-9_-]+$")
 
-    @validator("username", pre=True)
-    def username_is_valid(cls, username: str) -> str:
-        return validate_username(username)
+
+    #second approach
+    # username: str
+    #
+    # @validator("username", pre=True)
+    # def username_is_valid(cls, username: str) -> str:
+    #     return validate_username(username)
 
 
 class UserUpdate(CoreModel):
     """
     Users are allowed to update their email and/or username
     """
-    email: EmailStr
-    username: str
-
-    @validator("username", pre=True)
-    def username_is_valid(cls, username: str) -> str:
-        return validate_username(username)
+    email: Optional[EmailStr]
+    username: Optional[constr(min_length=3, regex="^[a-zA-Z0-9_-]+$")]
+    #second apporach
+    # username: str
+    #
+    # @validator("username", pre=True)
+    # def username_is_valid(cls, username: str) -> str:
+    #     return validate_username(username)
 
 
 class UserPasswordUpdate(CoreModel):
