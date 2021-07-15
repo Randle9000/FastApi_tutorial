@@ -33,6 +33,11 @@ UPDATE_CLEANING_BY_ID="""
     RETURNING id, name, description, price, cleaning_type;  
 """
 
+DELETE_CLEANING_BY_ID_QUERY = """
+    DELETE FROM cleanings  
+    WHERE id = :id  
+    RETURNING id;  
+"""
 
 class CleaningsRepository(BaseRepository):
     """
@@ -75,3 +80,12 @@ class CleaningsRepository(BaseRepository):
         except Exception as e:
             print(e)
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Invalid update params.")
+
+    async def delete_cleaning_by_id(self, id: int):
+        cleaning = await self.get_cleaning_by_id(id=id)
+
+        if not cleaning:
+            return None
+
+        deleted_id = await self.db.execute(query=DELETE_CLEANING_BY_ID_QUERY, values={"id": id})
+        return deleted_id
