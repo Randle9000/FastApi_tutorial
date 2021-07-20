@@ -64,7 +64,7 @@ class UserPasswordUpdate(CoreModel):
     salt: str
 
 
-class UserInDb(IDModelMixin, DateTimeModelMixin, UserBase):
+class UserInDB(IDModelMixin, DateTimeModelMixin, UserBase):
     """
     ADd in id, created_at, updated_at, and user's passwrod and salt
     """
