@@ -39,6 +39,7 @@ DELETE_CLEANING_BY_ID_QUERY = """
     RETURNING id;  
 """
 
+
 class CleaningsRepository(BaseRepository):
     """
     All databases actions associated with the Cleaning resource
