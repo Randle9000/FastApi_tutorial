@@ -14,6 +14,9 @@ from alembic.config import Config
 from app.models.cleaning import CleaningCreate, CleaningInDB
 from app.db.repositories.cleanings import CleaningsRepository
 
+from app.models.user import UserInDB, UserCreate
+from app.db.repositories.users import UsersRepository
+
 # Apply migrations at beginning and end of testing session
 @pytest.fixture(scope="session")
 def apply_migrations():
@@ -62,3 +65,19 @@ async def test_cleaning(db: Database) -> CleaningInDB:
         cleaning_type="spot_clean",
     )
     return await cleaning_repo.create_cleaning(new_cleaning=new_cleaning)
+
+
+@pytest.fixture
+async def test_user(db: Database) -> UserInDB:
+    new_user = UserCreate(
+        email="zwirek@odmuchomorka.pl",
+        username="zwirekodmuchomorka",
+        password="czechoslowacja"
+    )
+
+    user_repo = UsersRepository(db)
+    existing_user = await user_repo.get_user_by_email(email=new_user.email)
+    if existing_user:
+        return existing_user
+
+    return await user_repo.register_new_user(new_user=new_user)
