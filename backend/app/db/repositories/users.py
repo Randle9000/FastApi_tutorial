@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import EmailStr
 from fastapi import HTTPException, status
 from databases import Database
@@ -73,3 +74,12 @@ class UsersRepository(BaseRepository):
         created_user = await self.db.fetch_one(query=REGISTER_NEW_USER_QUERY, values=new_user_params.dict())
 
         return UserInDB(**created_user)
+
+    async def authenticate_user(self, *, email: EmailStr, password: str) -> Optional[UserInDB]:
+        user = await self.get_user_by_email(email=email)
+        if not user:
+            return None
+
+        if not self.auth_service.verify_password(password=password, salt=user.salt, hashed_pw=user.password):
+            return None
+        return user
