@@ -186,3 +186,67 @@ class TestAuthTokens:
                 expires_in=ACCESS_TOKEN_EXPIRE_MINUTES,
             )
             jwt.decode(access_token, str(SECRET_KEY), audience=JWT_AUDIENCE, algorithms=[JWT_ALGORITHM])
+
+
+class TestUserLogin:
+    """
+    Notice in both tests how we're not using the json parameter for sending data with our httpx client.
+    Instead we use the data parameter. This is intentional and is how httpx expects form data to be sent in our client.
+    """
+    async def test_user_can_logic_successfully_and_receives_valid_token(
+            self,
+            app: FastAPI,
+            client: AsyncClient,
+            test_user: UserInDB,
+    ) -> None:
+
+        # user sends their email and password to our login point as form data and not JSON
+        client.headers["content-type"] = "application/x-www-form-urlencoded"# this is necessary to accept form data
+                                                                            # instead of json
+        login_data = {
+            "username": test_user.email, # we use email to log in, check what route is invoked below login-email-and-..
+            "password": "czechoslowacja",
+        }
+        res = await client.post(app.url_path_for("users:login-email-and-password"), data=login_data)# data instead json
+        assert res.status_code == HTTP_200_OK
+        # check that token exists in response and has user encoded within
+        token = res.json().get("access_token")
+        creds = jwt.decode(token, str(SECRET_KEY), audience=JWT_AUDIENCE, algorithms=[JWT_ALGORITHM])
+        assert "username" in creds
+        assert creds["username"] == test_user.username
+        assert "sub" in creds
+        assert creds["sub"] == test_user.email
+        # check that token is proper type
+        assert "token_type" in res.json()
+        assert res.json().get("token_type") == "bearer"
+
+    @pytest.mark.parametrize(
+        "credential, wrong_value, status_code",
+        (
+            ("email", "wrong@email.com", 401),
+            ("email", None, 401),
+            ("email", "notemail", 401),
+            ("password", "wrongpassword", 401),
+            ("password", None, 401),
+        ),
+    )
+    async def test_user_with_wrong_creds_doesnt_receive_token(
+            self,
+            app: FastAPI,
+            client: AsyncClient,
+            test_user: UserInDB,
+            credential: str,
+            wrong_value: str,
+            status_code:str,
+    ) -> None:
+        client.headers["content-type"] = "application/x-www-form-urlencoded"
+        user_data = test_user.dict()
+        user_data["password"] = "protonneutron"
+        user_data[credential] = wrong_value
+        login_data = {
+            "username": user_data["email"],
+            "password": user_data["password"],  # insert password from parameters
+        }
+        res = await client.post(app.url_path_for("users:login-email-and-password"), data=login_data) # data instead json
+        assert res.status_code == status_code
+        assert "access_token" not in res.json()
