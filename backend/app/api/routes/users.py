@@ -12,9 +12,11 @@ from starlette.status import (
 )
 
 from app.api.dependencies.database import get_repository
-from app.models.user import UserCreate, UserPublic
+from app.api.dependencies.auth import get_current_active_user
+from app.models.user import UserCreate, UserPublic, UserInDB
 from app.models.token import AccessToken
 from app.services import auth_service
+
 
 from app.db.repositories.users import UsersRepository
 
@@ -32,6 +34,7 @@ async def register_new_user(
     )
     return UserPublic(**created_user.dict(), access_token=access_token)
 
+
 @router.post("/login/token", response_model=AccessToken, name="users:login-email-and-password")
 async def user_login_with_email_and_password(
         user_repo: UsersRepository = Depends(get_repository(UsersRepository)),
@@ -46,3 +49,13 @@ async def user_login_with_email_and_password(
         )
     access_token = AccessToken(access_token=auth_service.create_access_token_for_user(user=user), token_type="bearer")
     return access_token
+
+
+@router.get("/me/", response_model=UserPublic, name="users:get-current-user")
+async def get_currently_authenticated_user(current_user: UserInDB = Depends(get_current_active_user)) -> UserPublic:
+    # This is where things get interesting. We're going to need to somehow inject the currently authenticated user \
+    # into the /me/ route.
+    # Remember that we only know the user is logged in by the token passed to our routes in the Authentication header.
+    # Instead of parsing the request ourselves and searching for that token,
+    # we're going to hand that responsibility over to FastAPI."""
+    return current_user
