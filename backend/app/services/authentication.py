@@ -10,7 +10,9 @@ from app.models.user import UserPasswordUpdate, UserInDB
 from fastapi import HTTPException, status
 from pydantic import ValidationError
 
+import logging
 
+logger = logging.getLogger(__name__)
 
 # TODO get more info
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -59,12 +61,13 @@ class AuthService:
             **jwt_meta.dict(),
             **jwt_creds.dict(),
         )
-        # NOTE - previous versions of pyjwt ("<2.0") returned the token as bytes insted of a string.
+        # NOTE - previous versions of pyjwt ("<2.0") returned the token as bytes instead of a string.
         # That is no longer the case and the `.decode("utf-8")` has been removed.
         access_token = jwt.encode(token_payload.dict(), secret_key, algorithm=JWT_ALGORITHM)
         return access_token
 
     def get_username_from_token(self, *, token: str, secret_key: str) -> Optional[str]:
+        logger.info("services - get_username_from_token")
         try:
             decoded_token = jwt.decode(token, str(secret_key), audience=JWT_AUDIENCE, algorithms=[JWT_ALGORITHM])
             payload = JWTPayload(**decoded_token)

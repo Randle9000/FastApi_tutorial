@@ -19,7 +19,9 @@ from app.services import auth_service
 
 
 from app.db.repositories.users import UsersRepository
+import logging
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -32,14 +34,16 @@ async def register_new_user(
     access_token = AccessToken(
         access_token=auth_service.create_access_token_for_user(user=created_user), token_type="bearer"
     )
+
     return UserPublic(**created_user.dict(), access_token=access_token)
 
 
-@router.post("/login/token", response_model=AccessToken, name="users:login-email-and-password")
+@router.post("/login/token/", response_model=AccessToken, name="users:login-email-and-password")
 async def user_login_with_email_and_password(
         user_repo: UsersRepository = Depends(get_repository(UsersRepository)),
         form_data: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRequestForm),
 ) -> AccessToken:
+    logger.info('user_login_with_email_and_password')
     user = await user_repo.authenticate_user(email=form_data.username, password=form_data.password)
     if not user:
         raise HTTPException(
@@ -53,9 +57,14 @@ async def user_login_with_email_and_password(
 
 @router.get("/me/", response_model=UserPublic, name="users:get-current-user")
 async def get_currently_authenticated_user(current_user: UserInDB = Depends(get_current_active_user)) -> UserPublic:
-    # This is where things get interesting. We're going to need to somehow inject the currently authenticated user \
-    # into the /me/ route.
-    # Remember that we only know the user is logged in by the token passed to our routes in the Authentication header.
-    # Instead of parsing the request ourselves and searching for that token,
-    # we're going to hand that responsibility over to FastAPI."""
+    logger.info('routes - get_currently_authenticated_user')
     return current_user
+
+# @router.get("/me/", response_model=UserPublic, name="users:get-current-user")
+# async def get_currently_authenticated_user(current_user: UserInDB = Depends(get_current_active_user)) -> UserPublic:
+#     # This is where things get interesting. We're going to need to somehow inject the currently authenticated user \
+#     # into the /me/ route.
+#     # Remember that we only know the user is logged in by the token passed to our routes in the Authentication header.
+#     # Instead of parsing the request ourselves and searching for that token,
+#     # we're going to hand that responsibility over to FastAPI."""
+#     return current_user
