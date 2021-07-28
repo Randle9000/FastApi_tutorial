@@ -61,7 +61,7 @@ class UsersRepository(BaseRepository):
             user = UserInDB(**user_record)
 
             if populate:
-                return await self.populate(user=user)
+                return await self.populate_user(user=user)
 
             return user
 
