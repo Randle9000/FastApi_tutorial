@@ -52,17 +52,18 @@ class UsersRepository(BaseRepository):
 
             if populate:
                 return await self.populate_user(user=user)
-        return user
+
+            return user
 
     async def get_user_by_user_name(self, *, username: str, populate: bool = True) -> UserInDB:
         user_record = await self.db.fetch_one(query=GET_USER_BY_USER_NAME_QUERY, values={"username": username})
-        if not user_record:
+        if user_record:
             user = UserInDB(**user_record)
 
             if populate:
                 return await self.populate(user=user)
 
-        return user
+            return user
 
     async def register_new_user(self, *, new_user: UserCreate) -> UserInDB:
         # make sure email isn't already taken
