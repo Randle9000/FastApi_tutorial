@@ -1,5 +1,5 @@
 
-
+import pprint
 from fastapi import APIRouter, HTTPException, Path, Body, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette.status import (
@@ -34,8 +34,16 @@ async def register_new_user(
     access_token = AccessToken(
         access_token=auth_service.create_access_token_for_user(user=created_user), token_type="bearer"
     )
+    created_user.access_token = access_token
+    return UserPublic(**created_user.dict())
+    # or as it is in the tutorial
+    # return created_user.copy(update={"access_token": access_token})
 
-    return UserPublic(**created_user.dict(), access_token=access_token)
+    # return UserPublic(**created_user.dict(), access_token=access_token)
+    # it throws ModelMetaclass object got multiple values for keyword argument 'access_token'
+    # because access_token is also in created_user dict
+    # app does not knwo which one access token user
+    # and now the created_user returns UserPublic instead of UserInDB and UserPublic has field access_token....
 
 
 @router.post("/login/token/", response_model=AccessToken, name="users:login-email-and-password")
