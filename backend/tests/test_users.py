@@ -34,7 +34,7 @@ pytestmark = pytest.mark.asyncio
 
 
 class TestUserRoutes:
-    async def test_routes_exits(self, app: FastAPI, client: AsyncClient) -> None:
+    async def test_routes_exists(self, app: FastAPI, client: AsyncClient) -> None:
         new_user = {"email": "test@email.io", "username": "test_username", "password": "testpassword"}
         res = await client.post(app.url_path_for("users:register-new-user"), json={"new_user": new_user})
         assert res.status_code != HTTP_404_NOT_FOUND
