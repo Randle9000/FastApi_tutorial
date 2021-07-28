@@ -1,9 +1,9 @@
-from typing import Optional # We use the Optional type declaration to specify that any attribute not passed in
+from typing import Optional, Union  # We use the Optional type declaration to specify that any attribute not passed in
 # when creating the model instance will be set to None
 from enum import Enum
 
-from app.models.core import CoreModel, IDModelMixin
-
+from app.models.core import CoreModel, IDModelMixin, DateTimeModelMixin
+from app.models.user import UserPublic
 
 """
 Why do we create the five different models: Base, Create, Update, InDB, Public:
@@ -18,7 +18,6 @@ And that pattern might be used in different places for almost every resource
 And the models should corresponds to the tables created in DB 
 (Compare to the code in migration/versions
 """
-
 
 
 class CleaningType(str, Enum):
@@ -59,11 +58,12 @@ class CleaningUpdate(CleaningBase):
     cleaning_type: Optional[CleaningType]
 
 
-class CleaningInDB(IDModelMixin, CleaningBase):
+class CleaningInDB(IDModelMixin, CleaningBase, DateTimeModelMixin):
     name: str
     price: float
     cleaning_type: CleaningType
+    owner: int
 
 
 class CleaningPublic(IDModelMixin, CleaningBase):
-    pass
+    owner: Union[int, UserPublic]
