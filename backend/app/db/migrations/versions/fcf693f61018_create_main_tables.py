@@ -70,6 +70,7 @@ def create_cleanings_table() -> None:
         sa.Column("description", sa.Text, nullable=True),
         sa.Column("cleaning_type", sa.Text, nullable=False, server_default="spot_clean"),
         sa.Column("price", sa.Numeric(10, 2), nullable=False),
+        sa.Column("owner", sa.Integer, sa.ForeignKey("users.id", ondelete="CASCADE")),
         *timestamps(),
     )
     op.execute(
