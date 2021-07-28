@@ -30,6 +30,9 @@ async def get_profile_be_username(
 
 @router.put("/me/", response_model=ProfilePublic, name="profiles:update-own-profile")
 async def update_own_profile(
-        profile_update: ProfileUpdate = Body(..., embed=True)
+        profile_update: ProfileUpdate = Body(..., embed=True),
+        current_user: UserInDB = Depends(get_current_active_user),
+        profile_repo: ProfilesRepository = Depends(get_repository(ProfilesRepository))
 ) -> ProfilePublic:
-    return None
+    updated_profile = await profile_repo.update_current_user(profile_update=profile_update, requesting_user=current_user)
+    return updated_profile
