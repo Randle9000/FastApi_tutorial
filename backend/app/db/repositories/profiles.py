@@ -1,5 +1,5 @@
 from app.db.repositories.base import BaseRepository
-from app.models.profile import ProfileCreate, ProfileInDB
+from app.models.profile import ProfileCreate, ProfileInDB, ProfileUpdate
 from app.models.user import UserInDB
 
 CREATE_PROFILE_FOR_USER_QUERY = """
@@ -30,7 +30,17 @@ FROM profiles p
     INNER JOIN users u
     ON p.user_id = u.id
 WHERE user_id = (SELECT id FROM users WHERE username = :username);
-""" # why not WHERE u.username = : username ?? to verify
+""" # why not WHERE u.username = : username ?? to verify A: I know why the tutor does not spot it.
+
+UPDATE_PROFILE_QUERY="""
+UPDATE profiles
+SET full_name       = :full_name,
+    phone_number    = :phone_number,
+    bio             = :bio,
+    image           = :image
+WHERE user_id       = :user_id
+RETURNING id, full_name, phone_number, bio, image, user_id, created_at, updated_at;
+"""
 
 
 class ProfilesRepository(BaseRepository):
@@ -55,3 +65,13 @@ class ProfilesRepository(BaseRepository):
             return None
 
         return ProfileInDB(**profile_record)
+
+    async def update_current_user(self, *, profile_update: ProfileUpdate, requesting_user: UserInDB) -> ProfileInDB:
+        profile = await self.get_profile_by_user_id(user_id=requesting_user.id)
+        update_params = profile.copy(update=profile_update.dict(exclude_unset=True))
+        update_profile = await self.db.fetch_one(
+            query=UPDATE_PROFILE_QUERY,
+            values=update_params.dict(exclude={"id", "created_at", "updated_at", "username", "email"}),
+        )
+        return ProfileInDB(**update_profile)
+
