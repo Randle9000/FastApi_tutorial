@@ -5,6 +5,7 @@ from pydantic import EmailStr, constr, validator
 
 from app.models.core import DateTimeModelMixin, IDModelMixin, CoreModel
 from app.models.token import AccessToken
+from app.models.profile import ProfilePublic
 
 
 def validate_username(username: str) -> str:
@@ -49,7 +50,8 @@ class UserUpdate(CoreModel):
     """
     email: Optional[EmailStr]
     username: Optional[constr(min_length=3, regex="^[a-zA-Z0-9_-]+$")]
-    #second apporach
+
+    # second approach
     # username: str
     #
     # @validator("username", pre=True)
@@ -75,3 +77,4 @@ class UserInDB(IDModelMixin, DateTimeModelMixin, UserBase):
 
 class UserPublic(IDModelMixin, DateTimeModelMixin, UserBase):
     access_token: Optional[AccessToken] # we should update our UserPublic model to also store an optional access token
+    profile: Optional[ProfilePublic]
