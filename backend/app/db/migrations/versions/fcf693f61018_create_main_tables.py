@@ -130,16 +130,16 @@ def create_profiles_table() -> None:
         """
     )
 
-
+# the order of function calls in the 'upgrade' matters
 def upgrade() -> None:
     create_updated_at_trigger()
-    create_cleanings_table()
     create_users_table()
     create_profiles_table()
+    create_cleanings_table()
 
 
 def downgrade() -> None:
+    op.drop_table("cleanings")
     op.drop_table("profiles")
     op.drop_table("users")
-    op.drop_table("cleanings")
-    op.execute('DROP FUNCTION update_updated_at_column')
+    op.execute("DROP FUNCTION update_updated_at_column")
