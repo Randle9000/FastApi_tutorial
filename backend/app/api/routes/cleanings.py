@@ -69,7 +69,7 @@ async def get_all_cleanings(
 @router.post("/", response_model=CleaningPublic, name="cleanings:create-cleaning", status_code=HTTP_201_CREATED)
 async def create_new_cleaning(
     new_cleaning: CleaningCreate = Body(..., embed=True),
-    current_user: UserInDB = Depends(get_current_active_user()),
+    current_user: UserInDB = Depends(get_current_active_user),
     cleanings_repo: CleaningsRepository = Depends(get_repository(CleaningsRepository)),
 ) -> CleaningPublic:
     created_cleaning = await cleanings_repo.create_cleaning(new_cleaning=new_cleaning, requesting_user=current_user)
@@ -78,14 +78,24 @@ async def create_new_cleaning(
 
 @router.get("/{id}", response_model=CleaningPublic, name="cleanings:get-cleaning-by-id", status_code=HTTP_200_OK)
 async def get_cleanings_by_id(
-        id: int, cleanings_repo: CleaningsRepository = Depends(get_repository(CleaningsRepository)),
+        id: int = Path(..., ge=1),
+        current_user: UserInDB = Depends(get_current_active_user),
+        cleanings_repo: CleaningsRepository = Depends(get_repository(CleaningsRepository)),
 ) -> CleaningPublic:
-    cleaning = await cleanings_repo.get_cleaning_by_id(id=id)
+    cleaning = await cleanings_repo.get_cleaning_by_id(id=id, requesting_user=current_user)
 
     if not cleaning:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="No cleaning found with that id.")
 
     return cleaning
+
+
+@router.get("/", response_model=List[CleaningPublic], name="cleanings:list-all-user-cleanings")
+async def list_all_user_cleanings(
+        current_user: UserInDB = Depends(get_current_active_user),
+        cleanings_repo: CleaningsRepository = Depends(get_repository(CleaningsRepository))
+) -> List[CleaningPublic]:
+    return await cleanings_repo.list_all_user_cleanings(requesting_user=current_user)
 
 
 @router.put("/{id}/", response_model=CleaningPublic, name="cleanings:update-cleaning-by-id")

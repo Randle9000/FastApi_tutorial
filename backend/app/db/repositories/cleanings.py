@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from starlette.status import HTTP_400_BAD_REQUEST
 
 from app.db.repositories.base import BaseRepository
-from app.models.cleaning import CleaningCreate, CleaningUpdate, CleaningInDB
+from app.models.cleaning import CleaningCreate, CleaningUpdate, CleaningInDB, CleaningPublic
 from app.models.user import UserInDB
 
 CREATE_CLEANING_QUERY = """
@@ -14,9 +14,15 @@ CREATE_CLEANING_QUERY = """
 """
 
 GET_CLEANING_BY_ID = """
-SELECT id, name, description, price, cleaning_type
+SELECT id, name, description, price, cleaning_type, owner, created_at, updated_at
 FROM cleanings
 WHERE id = :id;
+"""
+
+LIST_ALL_USER_CLEANINGS_QUERY = """
+    SELECT id, name, description, price, cleaning_type, owner, created_at, updated_at
+    FROM cleanings
+    WHERE owner = :owner;
 """
 
 GET_ALL_CLEANINGS = """
@@ -46,20 +52,27 @@ class CleaningsRepository(BaseRepository):
     All databases actions associated with the Cleaning resource
     """
 
-    async def create_cleaning(self, *, new_cleaning: CleaningCreate, requesting_user: UserInDB ) -> CleaningInDB:
+    async def create_cleaning(self, *, new_cleaning: CleaningCreate, requesting_user: UserInDB) -> CleaningInDB:
         query_values = new_cleaning.dict()
         cleaning = await self.db.fetch_one(
             query=CREATE_CLEANING_QUERY, values={**query_values, "owner": requesting_user.id}
         )
         return CleaningInDB(**cleaning)
 
-    async def get_cleaning_by_id(self, *, id: int) -> CleaningInDB:
+    async def get_cleaning_by_id(self, *, id: int, requesting_user: UserInDB) -> CleaningInDB:
         cleaning = await self.db.fetch_one(query=GET_CLEANING_BY_ID, values={"id": id})
 
         if not cleaning:
             return None
 
         return CleaningInDB(**cleaning)
+
+    async def list_all_user_cleanings(self, *, requesting_user: UserInDB) -> List[CleaningInDB]:
+        cleaning_records = await self.db.fetch_one(
+            query=LIST_ALL_USER_CLEANINGS_QUERY, values={"owner": requesting_user.id}
+        )
+
+        return [CleaningInDB(**l) for l in cleaning_records ]
 
     async def get_all_cleanings(self) -> List[CleaningInDB]:
         cleanings_records = await self.db.fetch_all(query=GET_ALL_CLEANINGS)

@@ -126,35 +126,66 @@ class TestCreateCleaning:
 
 
 class TestGetCleaning:
-    async def test_get_cleaning_by_id(self, app: FastAPI, client: AsyncClient, test_cleaning: CleaningInDB) -> None:
-        res = await client.get(app.url_path_for("cleanings:get-cleaning-by-id", id=test_cleaning.id))
+    async def test_get_cleaning_by_id(self, app: FastAPI, authorized_client: AsyncClient, test_cleaning: CleaningInDB) -> None:
+        res = await authorized_client.get(app.url_path_for("cleanings:get-cleaning-by-id", id=test_cleaning.id))
         assert res.status_code == status.HTTP_200_OK
         cleaning = CleaningInDB(**res.json())
         assert cleaning == test_cleaning
 
+    async def test_unauthorized_users_cant_access_cleanings(
+            self,
+            app: FastAPI,
+            client: AsyncClient,
+            test_cleaning: CleaningInDB,
+    ) -> None:
+        res = await client.get(app.url_path_for("cleanings:get-cleaning-by-id", id=test_cleaning.id))
+        assert res.status_code == status.HTTP_401_UNAUTHORIZED
+
     @pytest.mark.parametrize(
         "id, status_code",
         (
-            (500, 404),
+            (5000000, 404),
             (-1, 404),
             (None, 422),
         ),
     )
     async def test_wrong_id_returns_error(
-        self, app: FastAPI, client: AsyncClient, id: int, status_code: int
+        self, app: FastAPI, authorized_client: AsyncClient, id: int, status_code: int
     ) -> None:
-        res = await client.get(app.url_path_for("cleanings:get-cleaning-by-id", id=id))
+        res = await authorized_client.get(app.url_path_for("cleanings:get-cleaning-by-id", id=id))
         assert res.status_code == status_code
 
-    async def test_get_all_cleanings_returns_valid_response(
-            self, app: FastAPI, client: AsyncClient, test_cleaning: CleaningInDB
+    async def test_get_all_cleanings_returns_only_user_owned_cleanings(
+            self,
+            app: FastAPI,
+            authorized_client: AsyncClient,
+            test_user: UserInDB,
+            db: Database,
+            test_cleaning: CleaningInDB,
+            test_cleanings_list: List[CleaningInDB],
     ) -> None:
-        res = await client.get(app.url_path_for("cleanings:get-all-cleanings"))
+        res = await authorized_client.get(app.url_path_for("cleanings:list-all-user-cleanings"))
         assert res.status_code == status.HTTP_200_OK
         assert isinstance(res.json(), list)
         assert len(res.json()) > 0
         cleanings = [CleaningInDB(**l) for l in res.json()]
+        # check if the cleanings created by user is returned
         assert test_cleaning in cleanings
+        # test that all cleanings returned are owned by this user
+        for cleaning in cleanings:
+            assert cleaning.owner == test_user.id
+        # assert all cleanings created by another user not included (redundant, but fine
+        assert all(c not in cleanings for c in test_cleanings_list)
+
+    # async def test_get_all_cleanings_returns_valid_response(
+    #         self, app: FastAPI, authorized_client: AsyncClient, test_cleaning: CleaningInDB
+    # ) -> None:
+    #     res = await authorized_client.get(app.url_path_for("cleanings:get-all-cleanings"))
+    #     assert res.status_code == status.HTTP_200_OK
+    #     assert isinstance(res.json(), list)
+    #     assert len(res.json()) > 0
+    #     cleanings = [CleaningInDB(**l) for l in res.json()]
+    #     assert test_cleaning in cleanings
 
 
 class TestUpdateCleaning:
