@@ -62,8 +62,9 @@ class CleaningInDB(IDModelMixin, CleaningBase, DateTimeModelMixin):
     name: str
     price: float
     cleaning_type: CleaningType
-    owner: int
+    owner: int  # it's not Optional so it might have the big impact on whole app
 
 
 class CleaningPublic(IDModelMixin, CleaningBase):
-    owner: Union[int, UserPublic]
+    owner: Union[int, UserPublic] # it's not Optional so it might have the big impact on whole app
+

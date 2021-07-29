@@ -20,6 +20,7 @@ from app.db.repositories.cleanings import CleaningsRepository
 from app.models.user import UserInDB, UserCreate
 from app.db.repositories.users import UsersRepository
 
+
 # Apply migrations at beginning and end of testing session
 @pytest.fixture(scope="session")
 def apply_migrations():
