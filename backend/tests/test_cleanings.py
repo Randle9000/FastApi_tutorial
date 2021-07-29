@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Dict, Optional
 from databases import Database
 
 import pytest
@@ -87,7 +87,7 @@ class TestCreateCleaning:
             new_cleaning: CleaningCreate,
     ) -> None:
         res = await client.post(
-            app.url_path_for("cleanings:create-cleaning"), json={"new_cleaning": new_cleaning.dict}
+            app.url_path_for("cleanings:create-cleaning"), json={"new_cleaning": new_cleaning.dict()}
         )
         assert res.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -126,7 +126,8 @@ class TestCreateCleaning:
 
 
 class TestGetCleaning:
-    async def test_get_cleaning_by_id(self, app: FastAPI, authorized_client: AsyncClient, test_cleaning: CleaningInDB) -> None:
+    async def test_get_cleaning_by_id(self, app: FastAPI, authorized_client: AsyncClient, test_cleaning: CleaningInDB
+                                      ) -> None:
         res = await authorized_client.get(app.url_path_for("cleanings:get-cleaning-by-id", id=test_cleaning.id))
         assert res.status_code == status.HTTP_200_OK
         cleaning = CleaningInDB(**res.json())
@@ -203,7 +204,7 @@ class TestUpdateCleaning:
     async def test_update_cleaning_with_valid_input(
             self,
             app: FastAPI,
-            client: AsyncClient,
+            authorized_client: AsyncClient,
             test_cleaning: CleaningInDB,
             attrs_to_change: List[str],
             values: List[str],
@@ -216,9 +217,8 @@ class TestUpdateCleaning:
         # else:
         #     print("\n")
 
-        res = await client.put(
-            app.url_path_for("cleanings:update-cleaning-by-id", id=test_cleaning.id),
-            json=cleaning_update
+        res = await authorized_client.put(
+            app.url_path_for("cleanings:update-cleaning-by-id", id=test_cleaning.id), json=cleaning_update
         )
         assert res.status_code == status.HTTP_200_OK
         updated_cleaning = CleaningInDB(**res.json())
@@ -229,8 +229,36 @@ class TestUpdateCleaning:
             assert getattr(updated_cleaning, attrs_to_change[i]) == values[i]
         # make sure that no other attributes' values have changed
         for attr, value in updated_cleaning.dict().items():
-            if attr not in attrs_to_change:
+            if attr not in attrs_to_change and attr != "updated_at":
                 assert getattr(test_cleaning, attr) == value
+
+    async def test_user_receives_error_if_updating_other_users_cleaning(
+            self,
+            app: FastAPI,
+            authorized_client: AsyncClient,
+            test_cleanings_list: List[CleaningInDB],
+    ) -> None:
+        res = await authorized_client.put(
+            app.url_path_for("cleanings:update-cleaning-by-id", id=test_cleanings_list[0].id),
+            json={"cleaning_update": {"price": 99.99}},
+        )
+        assert res.status_code == status.HTTP_403_FORBIDDEN
+
+    async def test_user_cant_change_ownership_of_cleaning(
+            self,
+            app: FastAPI,
+            authorized_client: AsyncClient,
+            test_cleaning: CleaningInDB,
+            test_user: UserInDB,
+            test_user2: UserInDB,
+    ) -> None:
+        res = await authorized_client.put(
+            app.url_path_for("cleanings:update-cleaning-by-id", id=test_cleanings_list[0].id),
+            json={"cleaning_update": {'owner': test_user2.id}},
+        )
+        assert res.status_code == status.HTTP_200_OK
+        cleaning = CleaningPublic(**res.json())
+        assert cleaning.owner == test_user.id
 
     @pytest.mark.parametrize(
         "id, payload, status_code",
@@ -239,22 +267,21 @@ class TestUpdateCleaning:
             (0, {"name": "test2"}, 422),
             (500, {"name": "test3"}, 404),
             (1, None, 422),
-            (1, {"cleaning_type": "invalid cleaning type"}, 422), # does not match app.models.cleaning.CleaningType
+            (1, {"cleaning_type": "invalid cleaning type"}, 422),
             (1, {"cleaning_type": None}, 400),
         ),
     )
     async def test_update_cleaning_with_invalid_input_throws_error(
         self,
         app: FastAPI,
-        client: AsyncClient,
+        authorized_client: AsyncClient,
         id: int,
-        payload: dict,
+        payload: Dict[str, Optional[str]],
         status_code: int,
     ) -> None:
         cleaning_update = {"cleaning_update": payload}
-        res = await client.put(
-            app.url_path_for("cleanings:update-cleaning-by-id", id=id),
-            json=cleaning_update
+        res = await authorized_client.put(
+            app.url_path_for("cleanings:update-cleaning-by-id", id=id), json=cleaning_update
         )
         assert res.status_code == status_code
 
