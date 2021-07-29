@@ -3,9 +3,11 @@ from typing import List
 from fastapi import APIRouter, Body, Depends, HTTPException, Path
 from starlette.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_404_NOT_FOUND
 
+from app.models.user import UserInDB
 from app.models.cleaning import CleaningCreate, CleaningPublic, CleaningUpdate
 from app.db.repositories.cleanings import CleaningsRepository
 from app.api.dependencies.database import get_repository
+from app.api.dependencies.auth import get_current_active_user
 
 router = APIRouter()
 
@@ -67,9 +69,10 @@ async def get_all_cleanings(
 @router.post("/", response_model=CleaningPublic, name="cleanings:create-cleaning", status_code=HTTP_201_CREATED)
 async def create_new_cleaning(
     new_cleaning: CleaningCreate = Body(..., embed=True),
+    current_user: UserInDB = Depends(get_current_active_user()),
     cleanings_repo: CleaningsRepository = Depends(get_repository(CleaningsRepository)),
 ) -> CleaningPublic:
-    created_cleaning = await cleanings_repo.create_cleaning(new_cleaning=new_cleaning)
+    created_cleaning = await cleanings_repo.create_cleaning(new_cleaning=new_cleaning, requesting_user=current_user)
     return created_cleaning
 
 
