@@ -59,11 +59,11 @@ and sends the appropriate JSON as a response.
 # async def get_all_cleanings() -> List[CleaningPublic]:
 #     return [{ "id": 1, "name": "fake cleaning", "price": 0}]
 
-@router.get("/", response_model=List[CleaningPublic], name="cleanings:get-all-cleanings")
-async def get_all_cleanings(
-        cleanings_repo: CleaningsRepository = Depends(get_repository(CleaningsRepository)),
-) -> List[CleaningPublic]:
-    return await cleanings_repo.get_all_cleanings()
+# @router.get("/", response_model=List[CleaningPublic], name="cleanings:get-all-cleanings")
+# async def get_all_cleanings(
+#         cleanings_repo: CleaningsRepository = Depends(get_repository(CleaningsRepository)),
+# ) -> List[CleaningPublic]:
+#     return await cleanings_repo.get_all_cleanings()
 
 
 @router.post("/", response_model=CleaningPublic, name="cleanings:create-cleaning", status_code=HTTP_201_CREATED)
@@ -101,14 +101,16 @@ async def list_all_user_cleanings(
 @router.put("/{id}/", response_model=CleaningPublic, name="cleanings:update-cleaning-by-id")
 async def update_cleanings_by_id(
         id: int = Path(..., ge=1, title="The id of the cleaning to update"), # ge means the cleaning id must be integer greater or equal to 1
+        current_user: UserInDB = Depends(get_current_active_user),
         cleaning_update: CleaningUpdate = Body(..., embed=True),
         cleanings_repo: CleaningsRepository = Depends(get_repository(CleaningsRepository)),
 ) -> CleaningPublic:
-    updated_cleaning = await cleanings_repo.update_cleaning(id=id, cleaning_update=cleaning_update)
+    updated_cleaning = await cleanings_repo.update_cleaning(
+        id=id, cleaning_update=cleaning_update, requesting_user=current_user
+    )
 
     if not updated_cleaning:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="No cleaning found with that id")
-
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="No cleaning found with that id.")
     return updated_cleaning
 
 
