@@ -288,13 +288,13 @@ class TestUpdateCleaning:
 
 class TestDeleteCleaning:
     async def test_can_delete_cleaning_successfully(
-            self, app: FastAPI, client: AsyncClient, test_cleaning: CleaningInDB
+            self, app: FastAPI, authorized_client: AsyncClient, test_cleaning: CleaningInDB
     ) -> None:
         # delete the cleaning
-        res = await client.delete(app.url_path_for("cleanings:delete-cleaning-by-id", id=test_cleaning.id))
+        res = await authorized_client.delete(app.url_path_for("cleanings:delete-cleaning-by-id", id=test_cleaning.id))
         assert res.status_code == status.HTTP_200_OK
         # ensure that cleaning no longer exist
-        res = await client.get(app.url_path_for("cleanings:get-cleaning-by-id"), id=test_cleaning.id)
+        res = await authorized_client.get(app.url_path_for("cleanings:get-cleaning-by-id"), id=test_cleaning.id)
         assert res.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.parametrize(
