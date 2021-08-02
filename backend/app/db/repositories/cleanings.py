@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from fastapi import HTTPException
@@ -42,7 +43,7 @@ UPDATE_CLEANING_BY_ID = """
 
 DELETE_CLEANING_BY_ID_QUERY = """
     DELETE FROM cleanings  
-    WHERE id = :id  
+    WHERE id = :id AND owner = :owner  
     RETURNING id;  
 """
 
@@ -107,11 +108,19 @@ class CleaningsRepository(BaseRepository):
         )
         return CleaningInDB(**updated_cleaning)
 
-    async def delete_cleaning_by_id(self, id: int):
-        cleaning = await self.get_cleaning_by_id(id=id)
+    async def delete_cleaning_by_id(self, id: int, requesting_user :UserInDB):
+        cleaning = await self.get_cleaning_by_id(id=id, requesting_user=requesting_user)
 
         if not cleaning:
             return None
 
-        deleted_id = await self.db.execute(query=DELETE_CLEANING_BY_ID_QUERY, values={"id": id})
+        if cleaning.owner != requesting_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Users are only able to delete cleanings that they created.",
+            )
+
+        deleted_id = await self.db.execute(
+            query=DELETE_CLEANING_BY_ID_QUERY, values={"id": id, "owner": requesting_user.id})
+
         return deleted_id
