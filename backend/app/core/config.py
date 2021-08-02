@@ -16,8 +16,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = config(
 )
 
 JWT_ALGORITHM = config("JWT_ALGORITHM", cast=str, default="HS256") # algorithm to encode tokens
-JWT_AUDIENCE = config("JWT_AUDIENCE", cast=str, default="phresh:auth") # TODO what exactly is it?
-JWT_TOKEN_PREFIX = config("JWT_TOKEN_PREFIX", cast=str, default="Bearer") # TODO what exactly is it?
+JWT_AUDIENCE = config("JWT_AUDIENCE", cast=str, default="phresh:auth")
+JWT_TOKEN_PREFIX = config("JWT_TOKEN_PREFIX", cast=str, default="Bearer")
 
 POSTGRES_USER = config("POSTGRES_USER", cast=str)
 POSTGRES_PASSWORD = config("POSTGRES_PASSWORD", cast=Secret)

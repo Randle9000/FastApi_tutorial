@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 # that our users will send their email and password to so that they can authenticate.
 # This class simply informs FastAPI that the URL provided is the one used to get a token.
 # That information is used in OpenAPI and in FastAPI's interactive docs.
-ouath2_scheme = OAuth2PasswordBearer(tokenUrl=f"{API_PREFIX}/users/login/token/") # TODO here is the token??
+ouath2_scheme = OAuth2PasswordBearer(tokenUrl=f"{API_PREFIX}/users/login/token/")
 
 
 async def get_user_from_token(

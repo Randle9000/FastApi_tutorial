@@ -13,8 +13,6 @@ from pydantic import ValidationError
 import logging
 
 logger = logging.getLogger(__name__)
-
-# TODO get more info
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
