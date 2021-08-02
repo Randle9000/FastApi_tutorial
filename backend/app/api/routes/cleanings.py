@@ -4,7 +4,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Path
 from starlette.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_404_NOT_FOUND
 
 from app.models.user import UserInDB
-from app.models.cleaning import CleaningCreate, CleaningPublic, CleaningUpdate
+from app.models.cleaning import CleaningCreate, CleaningPublic, CleaningUpdate, CleaningInDB
 from app.db.repositories.cleanings import CleaningsRepository
 from app.api.dependencies.database import get_repository
 from app.api.dependencies.auth import get_current_active_user
@@ -117,9 +117,10 @@ async def update_cleanings_by_id(
 @router.delete("/{id}/", response_model=int, name="cleanings:delete-cleaning-by-id")
 async def delete_cleaning_by_id(
         id: int = Path(..., ge=1, title="The id of the cleanign to update"),
+        current_user: UserInDB = Depends(get_current_active_user),
         cleanings_repo: CleaningsRepository = Depends(get_repository(CleaningsRepository)),
 ) -> int:
-    deleted_id = await cleanings_repo.delete_cleaning_by_id(id=id)
+    deleted_id = await cleanings_repo.delete_cleaning_by_id(id=id, requesting_user=current_user)
     if not deleted_id:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="No cleaning found with that id")
 
