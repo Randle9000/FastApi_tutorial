@@ -65,6 +65,6 @@ class CleaningInDB(IDModelMixin, CleaningBase, DateTimeModelMixin):
     owner: int  # it's not Optional so it might have the big impact on whole app
 
 
-class CleaningPublic(IDModelMixin, CleaningBase):
+class CleaningPublic(CleaningInDB):
     owner: Union[int, UserPublic] # it's not Optional so it might have the big impact on whole app
 
