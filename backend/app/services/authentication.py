@@ -27,11 +27,14 @@ class AuthException(BaseException):
     """
     Custom auth exception that can be modified later on
     """
+
     pass
 
 
 class AuthService:
-    def create_salt_and_hashed_password(self, *, plaintext_password: str) -> UserPasswordUpdate:
+    def create_salt_and_hashed_password(
+        self, *, plaintext_password: str
+    ) -> UserPasswordUpdate:
         salt = self.generate_salt()
         hashed_password = self.hash_password(password=plaintext_password, salt=salt)
         return UserPasswordUpdate(salt=salt, password=hashed_password)
@@ -43,15 +46,15 @@ class AuthService:
         return pwd_context.hash(password + salt)
 
     def verify_password(self, *, password: str, salt: str, hashed_pw: str) -> bool:
-        return pwd_context.verify(password + salt, hashed_pw) # part of library passlib
+        return pwd_context.verify(password + salt, hashed_pw)  # part of library passlib
 
     def create_access_token_for_user(
-            self,
-            *,
-            user: Type[UserBase],
-            secret_key: str = str(SECRET_KEY),
-            audience: str = JWT_AUDIENCE,
-            expires_in: int = ACCESS_TOKEN_EXPIRE_MINUTES,
+        self,
+        *,
+        user: Type[UserBase],
+        secret_key: str = str(SECRET_KEY),
+        audience: str = JWT_AUDIENCE,
+        expires_in: int = ACCESS_TOKEN_EXPIRE_MINUTES,
     ) -> str:
         if not user or not isinstance(user, UserBase):
             return None
@@ -68,13 +71,17 @@ class AuthService:
         )
         # NOTE - previous versions of pyjwt ("<2.0") returned the token as bytes instead of a string.
         # That is no longer the case and the `.decode("utf-8")` has been removed.
-        access_token = jwt.encode(token_payload.dict(), secret_key, algorithm=JWT_ALGORITHM)
+        access_token = jwt.encode(
+            token_payload.dict(), secret_key, algorithm=JWT_ALGORITHM
+        )
         return access_token
 
     def get_username_from_token(self, *, token: str, secret_key: str) -> Optional[str]:
         logger.info("services - get_username_from_token")
         try:
-            decoded_token = jwt.decode(token, str(secret_key), audience=JWT_AUDIENCE, algorithms=[JWT_ALGORITHM])
+            decoded_token = jwt.decode(
+                token, str(secret_key), audience=JWT_AUDIENCE, algorithms=[JWT_ALGORITHM]
+            )
             payload = JWTPayload(**decoded_token)
         except (jwt.PyJWTError, ValidationError):
             raise HTTPException(
@@ -83,4 +90,3 @@ class AuthService:
                 headers={"WWW-Authenticate": "Bearer"},
             )
         return payload.username
-

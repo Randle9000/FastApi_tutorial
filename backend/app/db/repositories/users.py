@@ -16,19 +16,19 @@ from pydantic import EmailStr
 #  !!!!
 
 
-GET_USER_BY_EMAIL_QUERY="""
+GET_USER_BY_EMAIL_QUERY = """
 SELECT id, username, email, email_verified, password, salt, is_active, is_superuser, created_at, updated_at
 FROM users
 WHERE email = :email;
 """
 
-GET_USER_BY_USER_NAME_QUERY="""
+GET_USER_BY_USER_NAME_QUERY = """
 SELECT id, username, email, email_verified, password, salt, is_active, is_superuser, created_at, updated_at
 FROM users
 WHERE username = :username;
 """
 
-REGISTER_NEW_USER_QUERY="""
+REGISTER_NEW_USER_QUERY = """
 INSERT INTO users (username, email, password, salt)
 VALUES(:username, :email, :password, :salt)
 RETURNING id, username, email, email_verified, password, salt, is_active, is_superuser, created_at, updated_at;
@@ -41,8 +41,12 @@ class UsersRepository(BaseRepository):
         self.auth_service = auth_service
         self.profiles_repo = ProfilesRepository(db)
 
-    async def get_user_by_email(self, *, email: EmailStr, populate: bool = True) -> UserInDB:
-        user_record = await self.db.fetch_one(query=GET_USER_BY_EMAIL_QUERY, values={"email": email})
+    async def get_user_by_email(
+        self, *, email: EmailStr, populate: bool = True
+    ) -> UserInDB:
+        user_record = await self.db.fetch_one(
+            query=GET_USER_BY_EMAIL_QUERY, values={"email": email}
+        )
 
         if user_record:
             user = UserInDB(**user_record)
@@ -52,8 +56,12 @@ class UsersRepository(BaseRepository):
 
             return user
 
-    async def get_user_by_user_name(self, *, username: str, populate: bool = True) -> UserInDB:
-        user_record = await self.db.fetch_one(query=GET_USER_BY_USER_NAME_QUERY, values={"username": username})
+    async def get_user_by_user_name(
+        self, *, username: str, populate: bool = True
+    ) -> UserInDB:
+        user_record = await self.db.fetch_one(
+            query=GET_USER_BY_USER_NAME_QUERY, values={"username": username}
+        )
         if user_record:
             user = UserInDB(**user_record)
 
@@ -67,33 +75,41 @@ class UsersRepository(BaseRepository):
         if await self.get_user_by_email(email=new_user.email):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="That email is already taken. Login with that email or register with another one."
+                detail="That email is already taken. Login with that email or register with another one.",
             )
 
         # make sure username isn't already taken
         if await self.get_user_by_user_name(username=new_user.username):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="That user_name is already taken. Please try another one."
+                detail="That user_name is already taken. Please try another one.",
             )
 
-        user_password_update = self.auth_service.create_salt_and_hashed_password(plaintext_password=new_user.password)
+        user_password_update = self.auth_service.create_salt_and_hashed_password(
+            plaintext_password=new_user.password
+        )
         new_user_params = new_user.copy(update=user_password_update.dict())
-        created_user = await self.db.fetch_one(query=REGISTER_NEW_USER_QUERY, values=new_user_params.dict())
+        created_user = await self.db.fetch_one(
+            query=REGISTER_NEW_USER_QUERY, values=new_user_params.dict()
+        )
 
-        #create profile for new user
+        # create profile for new user
         await self.profiles_repo.create_profile_for_user(
             profile_create=ProfileCreate(user_id=created_user["id"])
         )
 
         return await self.populate_user(user=UserInDB(**created_user))
 
-    async def authenticate_user(self, *, email: EmailStr, password: str) -> Optional[UserInDB]:
+    async def authenticate_user(
+        self, *, email: EmailStr, password: str
+    ) -> Optional[UserInDB]:
         user = await self.get_user_by_email(email=email, populate=False)
         if not user:
             return None
 
-        if not self.auth_service.verify_password(password=password, salt=user.salt, hashed_pw=user.password):
+        if not self.auth_service.verify_password(
+            password=password, salt=user.salt, hashed_pw=user.password
+        ):
             return None
         return user
 
@@ -103,5 +119,5 @@ class UsersRepository(BaseRepository):
             # which will remove 'password' and 'salt'
             **user.dict(),
             # fetch the user's profile from the profiels repo
-            profile=await self.profiles_repo.get_profile_by_user_id(user_id=user.id)
+            profile=await self.profiles_repo.get_profile_by_user_id(user_id=user.id),
         )

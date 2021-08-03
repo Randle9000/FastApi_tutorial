@@ -15,6 +15,7 @@ class ProfileCreate(ProfileBase):
     """
     there is only one additional field which we need ot create profile, it's users id
     """
+
     user_id: int
 
 
@@ -22,6 +23,7 @@ class ProfileUpdate(ProfileBase):
     """
     Allow users to update fields but not the user_id
     """
+
     pass
 
 

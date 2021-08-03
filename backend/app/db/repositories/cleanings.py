@@ -57,14 +57,19 @@ class CleaningsRepository(BaseRepository):
     All databases actions associated with the Cleaning resource
     """
 
-    async def create_cleaning(self, *, new_cleaning: CleaningCreate, requesting_user: UserInDB) -> CleaningInDB:
+    async def create_cleaning(
+        self, *, new_cleaning: CleaningCreate, requesting_user: UserInDB
+    ) -> CleaningInDB:
         query_values = new_cleaning.dict()
         cleaning = await self.db.fetch_one(
-            query=CREATE_CLEANING_QUERY, values={**query_values, "owner": requesting_user.id}
+            query=CREATE_CLEANING_QUERY,
+            values={**query_values, "owner": requesting_user.id},
         )
         return CleaningInDB(**cleaning)
 
-    async def get_cleaning_by_id(self, *, id: int, requesting_user: UserInDB) -> CleaningInDB:
+    async def get_cleaning_by_id(
+        self, *, id: int, requesting_user: UserInDB
+    ) -> CleaningInDB:
         cleaning = await self.db.fetch_one(query=GET_CLEANING_BY_ID, values={"id": id})
 
         if not cleaning:
@@ -72,7 +77,9 @@ class CleaningsRepository(BaseRepository):
 
         return CleaningInDB(**cleaning)
 
-    async def list_all_user_cleanings(self, *, requesting_user: UserInDB) -> List[CleaningInDB]:
+    async def list_all_user_cleanings(
+        self, *, requesting_user: UserInDB
+    ) -> List[CleaningInDB]:
         cleaning_records = await self.db.fetch_all(
             query=LIST_ALL_USER_CLEANINGS_QUERY, values={"owner": requesting_user.id}
         )
@@ -84,7 +91,7 @@ class CleaningsRepository(BaseRepository):
         return [CleaningInDB(**cleaning) for cleaning in cleanings_records]
 
     async def update_cleaning(
-            self, *, id: int, cleaning_update: CleaningUpdate, requesting_user: UserInDB
+        self, *, id: int, cleaning_update: CleaningUpdate, requesting_user: UserInDB
     ) -> CleaningInDB:
         cleaning = await self.get_cleaning_by_id(id=id, requesting_user=requesting_user)
 
@@ -97,11 +104,14 @@ class CleaningsRepository(BaseRepository):
                 detail="Users are only able to update cleanings that they created.",
             )
 
-        cleaning_update_params = cleaning.copy(update=cleaning_update.dict(exclude_unset=True)) #By specifying exclude_unset=True, Pydantic will leave out any attributes that were not explicitly set when the model was created.
+        cleaning_update_params = cleaning.copy(
+            update=cleaning_update.dict(exclude_unset=True)
+        )  # By specifying exclude_unset=True, Pydantic will leave out any attributes that were not explicitly set when the model was created.
         if cleaning_update_params.cleaning_type is None:
-             raise HTTPException(
-                 status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid cleaning type. Cannot be None."
-             )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid cleaning type. Cannot be None.",
+            )
 
         updated_cleaning = await self.db.fetch_one(
             query=UPDATE_CLEANING_BY_ID,
@@ -112,7 +122,7 @@ class CleaningsRepository(BaseRepository):
         )
         return CleaningInDB(**updated_cleaning)
 
-    async def delete_cleaning_by_id(self, id: int, requesting_user :UserInDB):
+    async def delete_cleaning_by_id(self, id: int, requesting_user: UserInDB):
         cleaning = await self.get_cleaning_by_id(id=id, requesting_user=requesting_user)
 
         if not cleaning:
@@ -125,6 +135,8 @@ class CleaningsRepository(BaseRepository):
             )
 
         deleted_id = await self.db.execute(
-            query=DELETE_CLEANING_BY_ID_QUERY, values={"id": id, "owner": requesting_user.id})
+            query=DELETE_CLEANING_BY_ID_QUERY,
+            values={"id": id, "owner": requesting_user.id},
+        )
 
         return deleted_id

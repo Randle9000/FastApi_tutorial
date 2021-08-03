@@ -25,14 +25,17 @@ def new_cleaning():
 
 
 @pytest.fixture
-async def test_cleanings_list(db : Database, test_user2: UserInDB) -> List[CleaningInDB]:
+async def test_cleanings_list(db: Database, test_user2: UserInDB) -> List[CleaningInDB]:
     cleaning_repo: CleaningsRepository = CleaningsRepository(db)
     return [
         await cleaning_repo.create_cleaning(
             new_cleaning=CleaningCreate(
-                name=f"test cleaning {i}", description="test description", price=20.00, cleaning_type="full_clean"
+                name=f"test cleaning {i}",
+                description="test description",
+                price=20.00,
+                cleaning_type="full_clean",
             ),
-            requesting_user=test_user2
+            requesting_user=test_user2,
         )
         for i in range(5)
     ]
@@ -49,20 +52,23 @@ class TestCleaningRoutes:
         assert res.status_code != status.HTTP_404_NOT_FOUND
         res = await client.put(app.url_path_for("cleanings:update-cleaning-by-id", id=1))
         assert res.status_code != status.HTTP_404_NOT_FOUND
-        res = await client.delete(app.url_path_for("cleanings:delete-cleaning-by-id", id=0))
+        res = await client.delete(
+            app.url_path_for("cleanings:delete-cleaning-by-id", id=0)
+        )
         assert res.status_code != status.HTTP_404_NOT_FOUND
 
 
 class TestCreateCleaning:
     async def test_valid_input_creates_cleaning_belonging_to_user(
-            self,
-            app: FastAPI,
-            authorized_client: AsyncClient,
-            test_user: UserInDB,
-            new_cleaning : CleaningCreate,
+        self,
+        app: FastAPI,
+        authorized_client: AsyncClient,
+        test_user: UserInDB,
+        new_cleaning: CleaningCreate,
     ) -> None:
         res = await authorized_client.post(
-            app.url_path_for("cleanings:create-cleaning"), json={"new_cleaning": new_cleaning.dict()}
+            app.url_path_for("cleanings:create-cleaning"),
+            json={"new_cleaning": new_cleaning.dict()},
         )
         assert res.status_code == status.HTTP_201_CREATED
         created_cleaning = CleaningPublic(**res.json())
@@ -72,13 +78,14 @@ class TestCreateCleaning:
         assert created_cleaning.owner == test_user.id
 
     async def test_unauthorized_user_unable_to_create_cleaning(
-            self,
-            app: FastAPI,
-            client: AsyncClient,
-            new_cleaning: CleaningCreate,
+        self,
+        app: FastAPI,
+        client: AsyncClient,
+        new_cleaning: CleaningCreate,
     ) -> None:
         res = await client.post(
-            app.url_path_for("cleanings:create-cleaning"), json={"new_cleaning": new_cleaning.dict()}
+            app.url_path_for("cleanings:create-cleaning"),
+            json={"new_cleaning": new_cleaning.dict()},
         )
         assert res.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -89,37 +96,43 @@ class TestCreateCleaning:
             ({}, 422),
             ({"name": "test_name"}, 422),
             ({"price": 10.00}, 422),
-            ({"name": "test_name", "description": "test"}, 422)
+            ({"name": "test_name", "description": "test"}, 422),
         ),
     )
     async def test_invalid_input_raises_error(
-            self,
-            app: FastAPI,
-            authorized_client: AsyncClient,
-            invalid_payload: dict,
-            status_code: int
+        self,
+        app: FastAPI,
+        authorized_client: AsyncClient,
+        invalid_payload: dict,
+        status_code: int,
     ) -> None:
         res = await authorized_client.post(
-            app.url_path_for("cleanings:create-cleaning"), json={"new_cleaning": invalid_payload}
+            app.url_path_for("cleanings:create-cleaning"),
+            json={"new_cleaning": invalid_payload},
         )
         assert res.status_code == status_code
 
 
 class TestGetCleaning:
-    async def test_get_cleaning_by_id(self, app: FastAPI, authorized_client: AsyncClient, test_cleaning: CleaningInDB
-                                      ) -> None:
-        res = await authorized_client.get(app.url_path_for("cleanings:get-cleaning-by-id", id=test_cleaning.id))
+    async def test_get_cleaning_by_id(
+        self, app: FastAPI, authorized_client: AsyncClient, test_cleaning: CleaningInDB
+    ) -> None:
+        res = await authorized_client.get(
+            app.url_path_for("cleanings:get-cleaning-by-id", id=test_cleaning.id)
+        )
         assert res.status_code == status.HTTP_200_OK
         cleaning = CleaningInDB(**res.json())
         assert cleaning == test_cleaning
 
     async def test_unauthorized_users_cant_access_cleanings(
-            self,
-            app: FastAPI,
-            client: AsyncClient,
-            test_cleaning: CleaningInDB,
+        self,
+        app: FastAPI,
+        client: AsyncClient,
+        test_cleaning: CleaningInDB,
     ) -> None:
-        res = await client.get(app.url_path_for("cleanings:get-cleaning-by-id", id=test_cleaning.id))
+        res = await client.get(
+            app.url_path_for("cleanings:get-cleaning-by-id", id=test_cleaning.id)
+        )
         assert res.status_code == status.HTTP_401_UNAUTHORIZED
 
     @pytest.mark.parametrize(
@@ -135,19 +148,23 @@ class TestGetCleaning:
     async def test_wrong_id_returns_error(
         self, app: FastAPI, authorized_client: AsyncClient, id: int, status_code: int
     ) -> None:
-        res = await authorized_client.get(app.url_path_for("cleanings:get-cleaning-by-id", id=id))
+        res = await authorized_client.get(
+            app.url_path_for("cleanings:get-cleaning-by-id", id=id)
+        )
         assert res.status_code == status_code
 
     async def test_get_all_cleanings_returns_only_user_owned_cleanings(
-            self,
-            app: FastAPI,
-            authorized_client: AsyncClient,
-            test_user: UserInDB,
-            db: Database,
-            test_cleaning: CleaningInDB,
-            test_cleanings_list: List[CleaningInDB],
+        self,
+        app: FastAPI,
+        authorized_client: AsyncClient,
+        test_user: UserInDB,
+        db: Database,
+        test_cleaning: CleaningInDB,
+        test_cleanings_list: List[CleaningInDB],
     ) -> None:
-        res = await authorized_client.get(app.url_path_for("cleanings:list-all-user-cleanings"))
+        res = await authorized_client.get(
+            app.url_path_for("cleanings:list-all-user-cleanings")
+        )
         assert res.status_code == status.HTTP_200_OK
         assert isinstance(res.json(), list)
         assert len(res.json()) > 0
@@ -169,28 +186,38 @@ class TestUpdateCleaning:
             (["description"], ["new fake cleaning description"]),
             (["price"], [3.14]),
             (["cleaning_type"], ["full_clean"]),
-            (["name", "description"], ["extra new fake cleaning name", "extra new fake cleaning description"]),
+            (
+                ["name", "description"],
+                ["extra new fake cleaning name", "extra new fake cleaning description"],
+            ),
             (["price", "cleaning_type"], [42.00, "dust_up"]),
         ),
     )
     async def test_update_cleaning_with_valid_input(
-            self,
-            app: FastAPI,
-            authorized_client: AsyncClient,
-            test_cleaning: CleaningInDB,
-            attrs_to_change: List[str],
-            values: List[str],
+        self,
+        app: FastAPI,
+        authorized_client: AsyncClient,
+        test_cleaning: CleaningInDB,
+        attrs_to_change: List[str],
+        values: List[str],
     ) -> None:
-        cleaning_update = {"cleaning_update": {attrs_to_change[i]: values[i] for i in range(len(attrs_to_change))}}
+        cleaning_update = {
+            "cleaning_update": {
+                attrs_to_change[i]: values[i] for i in range(len(attrs_to_change))
+            }
+        }
         res = await authorized_client.put(
-            app.url_path_for("cleanings:update-cleaning-by-id", id=test_cleaning.id), json=cleaning_update
+            app.url_path_for("cleanings:update-cleaning-by-id", id=test_cleaning.id),
+            json=cleaning_update,
         )
         assert res.status_code == status.HTTP_200_OK
         updated_cleaning = CleaningInDB(**res.json())
         assert updated_cleaning.id == test_cleaning.id  # make sure it's the same cleaning
         # make sure that any attribute we updated has changed to the correct value
         for i in range(len(attrs_to_change)):
-            assert getattr(updated_cleaning, attrs_to_change[i]) != getattr(test_cleaning, attrs_to_change[i])
+            assert getattr(updated_cleaning, attrs_to_change[i]) != getattr(
+                test_cleaning, attrs_to_change[i]
+            )
             assert getattr(updated_cleaning, attrs_to_change[i]) == values[i]
         # make sure that no other attributes' values have changed
         for attr, value in updated_cleaning.dict().items():
@@ -198,24 +225,26 @@ class TestUpdateCleaning:
                 assert getattr(test_cleaning, attr) == value
 
     async def test_user_receives_error_if_updating_other_users_cleaning(
-            self,
-            app: FastAPI,
-            authorized_client: AsyncClient,
-            test_cleanings_list: List[CleaningInDB],
+        self,
+        app: FastAPI,
+        authorized_client: AsyncClient,
+        test_cleanings_list: List[CleaningInDB],
     ) -> None:
         res = await authorized_client.put(
-            app.url_path_for("cleanings:update-cleaning-by-id", id=test_cleanings_list[0].id),
+            app.url_path_for(
+                "cleanings:update-cleaning-by-id", id=test_cleanings_list[0].id
+            ),
             json={"cleaning_update": {"price": 99.99}},
         )
         assert res.status_code == status.HTTP_403_FORBIDDEN
 
     async def test_user_cant_change_ownership_of_cleaning(
-            self,
-            app: FastAPI,
-            authorized_client: AsyncClient,
-            test_cleaning: CleaningInDB,
-            test_user: UserInDB,
-            test_user2: UserInDB,
+        self,
+        app: FastAPI,
+        authorized_client: AsyncClient,
+        test_cleaning: CleaningInDB,
+        test_user: UserInDB,
+        test_user2: UserInDB,
     ) -> None:
         res = await authorized_client.put(
             app.url_path_for("cleanings:update-cleaning-by-id", id=test_cleaning.id),
@@ -246,39 +275,53 @@ class TestUpdateCleaning:
     ) -> None:
         cleaning_update = {"cleaning_update": payload}
         res = await authorized_client.put(
-            app.url_path_for("cleanings:update-cleaning-by-id", id=id), json=cleaning_update
+            app.url_path_for("cleanings:update-cleaning-by-id", id=id),
+            json=cleaning_update,
         )
         assert res.status_code == status_code
 
 
 class TestDeleteCleaning:
     async def test_can_delete_cleaning_successfully(
-            self, app: FastAPI, authorized_client: AsyncClient, test_cleaning: CleaningInDB
+        self, app: FastAPI, authorized_client: AsyncClient, test_cleaning: CleaningInDB
     ) -> None:
         # delete the cleaning
-        res = await authorized_client.delete(app.url_path_for("cleanings:delete-cleaning-by-id", id=test_cleaning.id))
+        res = await authorized_client.delete(
+            app.url_path_for("cleanings:delete-cleaning-by-id", id=test_cleaning.id)
+        )
         assert res.status_code == status.HTTP_200_OK
         # ensure that cleaning no longer exist
-        res = await authorized_client.get(app.url_path_for("cleanings:get-cleaning-by-id"), id=test_cleaning.id)
+        res = await authorized_client.get(
+            app.url_path_for("cleanings:get-cleaning-by-id"), id=test_cleaning.id
+        )
         assert res.status_code == status.HTTP_404_NOT_FOUND
 
     async def test_user_cant_delete_other_user_cleanings(
-            self,
-            app: FastAPI,
-            authorized_client: AsyncClient,
-            test_cleanings_list: List[CleaningInDB],
+        self,
+        app: FastAPI,
+        authorized_client: AsyncClient,
+        test_cleanings_list: List[CleaningInDB],
     ) -> None:
         res = await authorized_client.delete(
-            app.url_path_for("cleanings:delete-cleaning-by-id", id=test_cleanings_list[0].id)
+            app.url_path_for(
+                "cleanings:delete-cleaning-by-id", id=test_cleanings_list[0].id
+            )
         )
         assert res.status_code == status.HTTP_403_FORBIDDEN
 
     @pytest.mark.parametrize(
-        "id, status_code", ((5000000, 404), (0, 422), (-1, 422), (None, 422)),
+        "id, status_code",
+        ((5000000, 404), (0, 422), (-1, 422), (None, 422)),
     )
     async def test_can_delete_cleaning_successfully(
-        self, app: FastAPI, authorized_client: AsyncClient, test_cleaning: CleaningInDB, id: int, status_code: int
+        self,
+        app: FastAPI,
+        authorized_client: AsyncClient,
+        test_cleaning: CleaningInDB,
+        id: int,
+        status_code: int,
     ) -> None:
-        res = await authorized_client.delete(app.url_path_for("cleanings:delete-cleaning-by-id", id=id))
+        res = await authorized_client.delete(
+            app.url_path_for("cleanings:delete-cleaning-by-id", id=id)
+        )
         assert res.status_code == status_code
-

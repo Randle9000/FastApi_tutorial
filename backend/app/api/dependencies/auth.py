@@ -15,17 +15,21 @@ logger = logging.getLogger(__name__)
 # that our users will send their email and password to so that they can authenticate.
 # This class simply informs FastAPI that the URL provided is the one used to get a token.
 # That information is used in OpenAPI and in FastAPI's interactive docs.
-ouath2_scheme = OAuth2PasswordBearer(tokenUrl=f"{API_PREFIX}/users/login/token/") # TODO here is the token??
+ouath2_scheme = OAuth2PasswordBearer(
+    tokenUrl=f"{API_PREFIX}/users/login/token/"
+)  # TODO here is the token??
 
 
 async def get_user_from_token(
-         *,
-        token: str = Depends(ouath2_scheme),
-        user_repo: UsersRepository = Depends(get_repository(UsersRepository)),
+    *,
+    token: str = Depends(ouath2_scheme),
+    user_repo: UsersRepository = Depends(get_repository(UsersRepository)),
 ) -> Optional[UserInDB]:
-    logger.info('dependencies - get_user_from_token')
+    logger.info("dependencies - get_user_from_token")
     try:
-        username = auth_service.get_username_from_token(token=token, secret_key=str(SECRET_KEY))
+        username = auth_service.get_username_from_token(
+            token=token, secret_key=str(SECRET_KEY)
+        )
         user = await user_repo.get_user_by_user_name(username=username)
     except Exception as e:
         raise e
@@ -33,8 +37,10 @@ async def get_user_from_token(
     return user
 
 
-def get_current_active_user(current_user: UserInDB = Depends(get_user_from_token)) -> Optional[UserInDB]:
-    logger.info('dependencies - get_current_active_user')
+def get_current_active_user(
+    current_user: UserInDB = Depends(get_user_from_token),
+) -> Optional[UserInDB]:
+    logger.info("dependencies - get_current_active_user")
     if not current_user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

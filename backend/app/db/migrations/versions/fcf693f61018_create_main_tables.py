@@ -58,7 +58,7 @@ def timestamps(indexed: bool = False) -> Tuple[sa.Column, sa.Column]:
             server_default=sa.func.now(),
             nullable=False,
             index=indexed,
-        )
+        ),
     )
 
 
@@ -91,11 +91,11 @@ def create_users_table() -> None:
         sa.Column("username", sa.Text, unique=True, nullable=False, index=True),
         sa.Column("email", sa.Text, unique=True, nullable=False, index=True),
         sa.Column("email_verified", sa.Boolean, nullable=False, server_default="False"),
-        sa.Column('salt', sa.Text, nullable=False),
+        sa.Column("salt", sa.Text, nullable=False),
         sa.Column("password", sa.Text, nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default="True"),
         sa.Column("is_superuser", sa.Boolean(), nullable=False, server_default="False"),
-        *timestamps()
+        *timestamps(),
     )
     op.execute(
         """
@@ -118,7 +118,6 @@ def create_profiles_table() -> None:
         sa.Column("image", sa.Text, nullable=True),
         sa.Column("user_id", sa.Integer, sa.ForeignKey("users.id", ondelete="CASCADE")),
         *timestamps(),
-
     )
     op.execute(
         """
@@ -129,6 +128,7 @@ def create_profiles_table() -> None:
         EXECUTE PROCEDURE update_updated_at_column();
         """
     )
+
 
 # the order of function calls in the 'upgrade' matters
 def upgrade() -> None:

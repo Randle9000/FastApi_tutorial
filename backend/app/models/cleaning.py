@@ -33,10 +33,13 @@ class CleaningBase(CoreModel):
     """
     All common characteristics of our cleaning resource
     """
+
     name: Optional[str]
     description: Optional[str]
     price: Optional[float]
-    cleaning_type: Optional[CleaningType] = "spot_clean" # here the default value is 'spot_clean'
+    cleaning_type: Optional[
+        CleaningType
+    ] = "spot_clean"  # here the default value is 'spot_clean'
 
 
 # intheriths from CleaningBase and CleaningBase from CoreBase and CoreBase from BaseModel of pedantic
@@ -52,6 +55,7 @@ class CleaningCreate(CleaningBase):
         price:          sa.Column("price", sa.Numeric(10, 2), nullable=False),
 
     """
+
     # each value passsed as name will be for coerced to be str (in that case)
     name: str
     price: float
@@ -69,5 +73,6 @@ class CleaningInDB(IDModelMixin, CleaningBase, DateTimeModelMixin):
 
 
 class CleaningPublic(CleaningInDB):
-    owner: Union[int, UserPublic] # it's not Optional so it might have the big impact on whole app
-
+    owner: Union[
+        int, UserPublic
+    ]  # it's not Optional so it might have the big impact on whole app

@@ -13,14 +13,18 @@ class JWTMeta(CoreModel):
     iat - when this token was issued at
     exp - when this token expires and is no longer valid proof that the requesting user is logged in.
     """
+
     iss: str = "phresh.io"
     aud: str = JWT_AUDIENCE
     iat: float = datetime.timestamp(datetime.utcnow())
-    exp: float = datetime.timestamp(datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    exp: float = datetime.timestamp(
+        datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
 
 
 class JWTCreds(CoreModel):
     """How we'll identify users"""
+
     sub: EmailStr
     username: str
 
@@ -29,6 +33,7 @@ class JWTPayload(JWTMeta, JWTCreds):
     """
     JWT Payload right before it's encoded - combine meta and username
     """
+
     pass
 
 
@@ -37,5 +42,6 @@ class AccessToken(CoreModel):
     The token_type attribute on our AccessToken model gives us the flexibility
     to modify our authentication system at a future date.
     """
+
     access_token: str
     token_type: str

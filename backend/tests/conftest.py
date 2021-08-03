@@ -49,7 +49,7 @@ async def client(app: FastAPI) -> AsyncClient:
         async with AsyncClient(
             app=app,
             base_url="http://testserver",
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         ) as client:
             yield client
 
@@ -63,7 +63,9 @@ async def test_cleaning(db: Database, test_user: UserInDB) -> CleaningInDB:
         price=9.99,
         cleaning_type="spot_clean",
     )
-    return await cleaning_repo.create_cleaning(new_cleaning=new_cleaning, requesting_user=test_user)
+    return await cleaning_repo.create_cleaning(
+        new_cleaning=new_cleaning, requesting_user=test_user
+    )
 
 
 @pytest.fixture
@@ -71,7 +73,7 @@ async def test_user(db: Database) -> UserInDB:
     new_user = UserCreate(
         email="zwirek@odmuchomorka.pl",
         username="zwirekodmuchomorka",
-        password="czechoslowacja"
+        password="czechoslowacja",
     )
 
     user_repo = UsersRepository(db)
@@ -87,8 +89,8 @@ async def test_user2(db: Database) -> UserInDB:
     new_user = UserCreate(
         email="stary@fanatyk.pzw",
         username="fanatykwedkarstwa",
-        password="szczupakkrolwod"
-)
+        password="szczupakkrolwod",
+    )
     user_repo = UsersRepository(db)
     existing_user = await user_repo.get_user_by_email(email=new_user.email)
     if existing_user:
@@ -98,11 +100,12 @@ async def test_user2(db: Database) -> UserInDB:
 
 @pytest.fixture
 def authorized_client(client: AsyncClient, test_user: UserInDB) -> AsyncClient:
-    access_token = auth_service.create_access_token_for_user(user=test_user, secret_key=str(SECRET_KEY))
+    access_token = auth_service.create_access_token_for_user(
+        user=test_user, secret_key=str(SECRET_KEY)
+    )
 
     client.headers = {
         **client.headers,
         "Authorization": f"{JWT_TOKEN_PREFIX} {access_token}",
     }
     return client
-
