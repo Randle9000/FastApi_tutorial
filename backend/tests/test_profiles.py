@@ -1,13 +1,10 @@
 import pytest
-
-from databases import Database
-
-from fastapi import FastAPI, status
-from httpx import AsyncClient
-
-from app.models.user import UserInDB, UserPublic
 from app.db.repositories.profiles import ProfilesRepository
 from app.models.profile import ProfileInDB, ProfilePublic
+from app.models.user import UserInDB, UserPublic
+from databases import Database
+from fastapi import FastAPI, status
+from httpx import AsyncClient
 
 pytestmark = pytest.mark.asyncio
 

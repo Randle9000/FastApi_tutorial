@@ -1,4 +1,4 @@
-from databases import DatabaseURL # should work in docker it's not installed locally
+from databases import DatabaseURL  # should work in docker it's not installed locally
 from starlette.config import Config
 from starlette.datastructures import Secret
 

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+
 #from starlette.middleware.cors import CORSMiddleware
 #TODO
 """ 
@@ -7,12 +8,13 @@ FastAPI is built on top of starlette more info https://www.starlette.io/
 """
 
 from fastapi.middleware.cors import CORSMiddleware
+
 """
 But developers from FastAPI created the interface for the most of the starlette interface
 so we can import it directly from fastapi
 """
-from app.core import config, tasks
 from app.api.routes import router as api_router
+from app.core import config, tasks
 
 
 def get_application():

@@ -1,16 +1,21 @@
-import jwt
-import bcrypt
+import logging
 from datetime import datetime, timedelta
-from passlib.context import CryptContext
 from typing import Optional, Type
 
-from app.core.config import SECRET_KEY, JWT_ALGORITHM, JWT_AUDIENCE, JWT_TOKEN_PREFIX, ACCESS_TOKEN_EXPIRE_MINUTES
-from app.models.token import JWTMeta, JWTCreds, JWTPayload
-from app.models.user import UserPasswordUpdate, UserInDB, UserBase, UserPasswordUpdate
+import bcrypt
+import jwt
+from app.core.config import (
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    JWT_ALGORITHM,
+    JWT_AUDIENCE,
+    JWT_TOKEN_PREFIX,
+    SECRET_KEY,
+)
+from app.models.token import JWTCreds, JWTMeta, JWTPayload
+from app.models.user import UserBase, UserInDB, UserPasswordUpdate
 from fastapi import HTTPException, status
+from passlib.context import CryptContext
 from pydantic import ValidationError
-
-import logging
 
 logger = logging.getLogger(__name__)
 

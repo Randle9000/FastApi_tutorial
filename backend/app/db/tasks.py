@@ -1,8 +1,11 @@
-import os
-from fastapi import FastAPI
-from databases import Database # to establish connection to postgresql with the db url string in config.py
-from app.core.config import DATABASE_URL
 import logging
+import os
+
+from app.core.config import DATABASE_URL
+from databases import (
+    Database,  # to establish connection to postgresql with the db url string in config.py
+)
+from fastapi import FastAPI
 
 logger = logging.getLogger(__name__)
 

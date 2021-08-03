@@ -1,14 +1,13 @@
+import logging
 from typing import Optional
 
+from app.api.dependencies.database import get_repository
+from app.core.config import API_PREFIX, SECRET_KEY
+from app.db.repositories.users import UsersRepository
+from app.models.user import UserInDB
+from app.services import auth_service
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-
-from app.core.config import SECRET_KEY, API_PREFIX
-from app.models.user import UserInDB
-from app.api.dependencies.database import get_repository
-from app.db.repositories.users import UsersRepository
-from app.services import auth_service
-import logging
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,14 @@
 
+import logging
 import pprint
-from fastapi import APIRouter, HTTPException, Path, Body, Depends
+
+from app.api.dependencies.auth import get_current_active_user
+from app.api.dependencies.database import get_repository
+from app.db.repositories.users import UsersRepository
+from app.models.token import AccessToken
+from app.models.user import UserCreate, UserInDB, UserPublic
+from app.services import auth_service
+from fastapi import APIRouter, Body, Depends, HTTPException, Path
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette.status import (
     HTTP_200_OK,
@@ -10,16 +18,6 @@ from starlette.status import (
     HTTP_404_NOT_FOUND,
     HTTP_422_UNPROCESSABLE_ENTITY,
 )
-
-from app.api.dependencies.database import get_repository
-from app.api.dependencies.auth import get_current_active_user
-from app.models.user import UserCreate, UserPublic, UserInDB
-from app.models.token import AccessToken
-from app.services import auth_service
-
-
-from app.db.repositories.users import UsersRepository
-import logging
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

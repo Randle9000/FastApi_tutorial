@@ -1,18 +1,14 @@
 import logging
-from typing import List, Dict, Optional
-from databases import Database
+from typing import Dict, List, Optional
 
 import pytest
-
-from httpx import AsyncClient
-from fastapi import FastAPI
-
-from starlette import status
-
 from app.db.repositories.cleanings import CleaningsRepository
-
 from app.models.cleaning import CleaningCreate, CleaningInDB, CleaningPublic
 from app.models.user import UserInDB
+from databases import Database
+from fastapi import FastAPI
+from httpx import AsyncClient
+from starlette import status
 
 # decorate all tests with @pytest.mark.asyncio
 pytestmark = pytest.mark.asyncio

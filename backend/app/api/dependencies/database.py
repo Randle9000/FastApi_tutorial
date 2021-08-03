@@ -1,10 +1,9 @@
 from typing import Callable, Type
-from databases import Database
-
-from fastapi import Depends
-from starlette.requests import Request
 
 from app.db.repositories.base import BaseRepository
+from databases import Database
+from fastapi import Depends
+from starlette.requests import Request
 
 
 def get_database(request: Request) -> Database:

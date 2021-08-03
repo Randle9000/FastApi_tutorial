@@ -1,11 +1,10 @@
 import string
 from typing import Optional
 
-from pydantic import EmailStr, constr, validator
-
-from app.models.core import DateTimeModelMixin, IDModelMixin, CoreModel
-from app.models.token import AccessToken
+from app.models.core import CoreModel, DateTimeModelMixin, IDModelMixin
 from app.models.profile import ProfilePublic
+from app.models.token import AccessToken
+from pydantic import EmailStr, constr, validator
 
 
 def validate_username(username: str) -> str:

@@ -1,8 +1,11 @@
-from typing import Optional, Union  # We use the Optional type declaration to specify that any attribute not passed in
 # when creating the model instance will be set to None
 from enum import Enum
+from typing import (  # We use the Optional type declaration to specify that any attribute not passed in
+    Optional,
+    Union,
+)
 
-from app.models.core import CoreModel, IDModelMixin, DateTimeModelMixin
+from app.models.core import CoreModel, DateTimeModelMixin, IDModelMixin
 from app.models.user import UserPublic
 
 """

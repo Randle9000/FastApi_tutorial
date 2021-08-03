@@ -6,9 +6,9 @@ Create Date: 2021-01-16 17:12:20.667046
 
 """
 from typing import Tuple
-from alembic import op
-import sqlalchemy as sa
 
+import sqlalchemy as sa
+from alembic import op
 
 # revision identifiers, used by Alembic
 revision = "fcf693f61018"

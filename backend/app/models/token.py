@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
-from pydantic import EmailStr
 
 # It's a good idea to standarize how we handle JWTs across our application
-from app.core.config import JWT_AUDIENCE, ACCESS_TOKEN_EXPIRE_MINUTES
+from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, JWT_AUDIENCE
 from app.models.core import CoreModel
+from pydantic import EmailStr
 
 
 class JWTMeta(CoreModel):

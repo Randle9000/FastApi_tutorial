@@ -1,6 +1,7 @@
 from typing import Optional
+
+from app.models.core import CoreModel, DateTimeModelMixin, IDModelMixin
 from pydantic import EmailStr, HttpUrl
-from app.models.core import CoreModel, IDModelMixin, DateTimeModelMixin
 
 
 class ProfileBase(CoreModel):

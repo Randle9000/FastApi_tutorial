@@ -1,14 +1,9 @@
-from fastapi import APIRouter, Path, Body, Depends, HTTPException, status
-
 from app.api.dependencies.auth import get_current_active_user
-
+from app.api.dependencies.database import get_repository
+from app.db.repositories.profiles import ProfilesRepository
 from app.models.profile import ProfilePublic, ProfileUpdate
 from app.models.user import UserInDB
-
-from app.db.repositories.profiles import ProfilesRepository
-
-from app.api.dependencies.database import get_repository
-
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
 
 router = APIRouter()
 

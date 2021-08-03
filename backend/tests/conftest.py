@@ -1,24 +1,19 @@
-import warnings
 import os
-import pytest
-
-from asgi_lifespan import LifespanManager
-from fastapi import FastAPI
-
-from httpx import AsyncClient
-from databases import Database
+import warnings
 
 import alembic
+import pytest
 from alembic.config import Config
-
-from app.core.config import SECRET_KEY, JWT_TOKEN_PREFIX
-from app.services import auth_service
-
-from app.models.cleaning import CleaningCreate, CleaningInDB
+from app.core.config import JWT_TOKEN_PREFIX, SECRET_KEY
 from app.db.repositories.cleanings import CleaningsRepository
-
-from app.models.user import UserInDB, UserCreate
 from app.db.repositories.users import UsersRepository
+from app.models.cleaning import CleaningCreate, CleaningInDB
+from app.models.user import UserCreate, UserInDB
+from app.services import auth_service
+from asgi_lifespan import LifespanManager
+from databases import Database
+from fastapi import FastAPI
+from httpx import AsyncClient
 
 
 # Apply migrations at beginning and end of testing session

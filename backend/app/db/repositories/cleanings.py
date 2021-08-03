@@ -1,12 +1,16 @@
 import logging
 from typing import List
 
+from app.db.repositories.base import BaseRepository
+from app.models.cleaning import (
+    CleaningCreate,
+    CleaningInDB,
+    CleaningPublic,
+    CleaningUpdate,
+)
+from app.models.user import UserInDB
 from fastapi import HTTPException
 from starlette import status
-
-from app.db.repositories.base import BaseRepository
-from app.models.cleaning import CleaningCreate, CleaningUpdate, CleaningInDB, CleaningPublic
-from app.models.user import UserInDB
 
 CREATE_CLEANING_QUERY = """
     INSERT INTO cleanings (name, description, price, cleaning_type, owner)

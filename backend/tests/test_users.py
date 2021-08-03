@@ -1,16 +1,23 @@
-import pytest
+from typing import List, Optional, Type, Union
 
-from httpx import AsyncClient
-from fastapi import FastAPI
-
-from typing import List, Union, Type, Optional
-
-import pytest
 import jwt
-
+import pytest
+from app.core.config import (
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    JWT_ALGORITHM,
+    JWT_AUDIENCE,
+    JWT_TOKEN_PREFIX,
+    SECRET_KEY,
+)
+from app.db.repositories.users import UsersRepository
+from app.models.token import JWTCreds, JWTMeta, JWTPayload
+from app.models.user import UserCreate, UserInDB, UserPublic
+from app.services import auth_service
+from databases import Database
+from fastapi import FastAPI, HTTPException, status
+from httpx import AsyncClient
 from pydantic import ValidationError
 from starlette.datastructures import Secret
-
 from starlette.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
@@ -19,16 +26,6 @@ from starlette.status import (
     HTTP_404_NOT_FOUND,
     HTTP_422_UNPROCESSABLE_ENTITY,
 )
-
-from app.models.user import UserCreate, UserInDB, UserPublic
-from app.db.repositories.users import UsersRepository
-from app.services import auth_service
-from app.core.config import SECRET_KEY, JWT_AUDIENCE, JWT_ALGORITHM, JWT_TOKEN_PREFIX, ACCESS_TOKEN_EXPIRE_MINUTES
-from app.models.token import JWTMeta, JWTCreds, JWTPayload
-
-from fastapi import FastAPI, HTTPException, status
-
-from databases import Database
 
 pytestmark = pytest.mark.asyncio
 

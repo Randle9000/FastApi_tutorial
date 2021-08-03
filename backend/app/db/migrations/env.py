@@ -1,13 +1,12 @@
+import logging
+import os
 import pathlib
 import sys
-import os
+from logging.config import fileConfig
 
 import alembic
-from sqlalchemy import engine_from_config, pool, create_engine
 from psycopg2 import DatabaseError
-
-from logging.config import fileConfig
-import logging
+from sqlalchemy import create_engine, engine_from_config, pool
 
 # we're appending the app directory to our path here so that we can import config easily
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[3]))

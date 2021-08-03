@@ -1,16 +1,13 @@
 from typing import Optional
-from pydantic import EmailStr
-from fastapi import HTTPException, status
-from databases import Database
 
 from app.db.repositories.base import BaseRepository
-from app.models.user import UserCreate, UserUpdate, UserInDB, UserPublic
-from app.models.profile import ProfileCreate, ProfilePublic
-from app.services import auth_service
 from app.db.repositories.profiles import ProfilesRepository
-from app.models.profile import ProfileCreate
-
-
+from app.models.profile import ProfileCreate, ProfilePublic
+from app.models.user import UserCreate, UserInDB, UserPublic, UserUpdate
+from app.services import auth_service
+from databases import Database
+from fastapi import HTTPException, status
+from pydantic import EmailStr
 
 #  !!!!
 #  REMINDER: NEVER STORE PASSWORDS IN PLAIN TEXT LIKE WE ARE HERE. There's
