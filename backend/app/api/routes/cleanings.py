@@ -34,9 +34,9 @@ The @router.get("/") tells FastAPI that the function right below is in charge of
 
 
 """
-The first of two path parameters in our create_new_cleaning function, new_cleaning, 
-is annotated with the CleaningCreate type. 
-By default, FastAPI expects the body of a post request directly. 
+The first of two path parameters in our create_new_cleaning function, new_cleaning,
+is annotated with the CleaningCreate type.
+By default, FastAPI expects the body of a post request directly.
 If we want it to expect JSON with a key new_cleaning and inside of it the model contents,
  we use the special Body parameter embed in the parameter default.
 
@@ -47,13 +47,13 @@ By simply specifying the CleaningCreate Python type declaration for new_cleaning
     Validate the data.
     Respond with an error if validation fails, or provide the route with the model instance needed.
 
-The second of the two path parameters - cleanings_repo - 
-is our database interface, and the route's only dependency. 
-We're setting its default to Depends(get_repository(CleaningsRepository)) 
-so that we have access to it in our route and can create the new cleaning 
-whenever the function is executed. 
-FastAPI automatically validates and converts the created_cleaning 
-to an instance of our CleaningPublic model, 
+The second of the two path parameters - cleanings_repo -
+is our database interface, and the route's only dependency.
+We're setting its default to Depends(get_repository(CleaningsRepository))
+so that we have access to it in our route and can create the new cleaning
+whenever the function is executed.
+FastAPI automatically validates and converts the created_cleaning
+to an instance of our CleaningPublic model,
 and sends the appropriate JSON as a response.
 
 """

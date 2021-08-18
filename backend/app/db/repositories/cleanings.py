@@ -15,7 +15,7 @@ from starlette import status
 CREATE_CLEANING_QUERY = """
     INSERT INTO cleanings (name, description, price, cleaning_type, owner)
     VALUES(:name, :description, :price, :cleaning_type, :owner)
-    RETURNING id, name, description, price, cleaning_type, owner, created_at, updated_at; 
+    RETURNING id, name, description, price, cleaning_type, owner, created_at, updated_at;
 """
 
 GET_CLEANING_BY_ID = """
@@ -46,9 +46,9 @@ UPDATE_CLEANING_BY_ID = """
 """
 
 DELETE_CLEANING_BY_ID_QUERY = """
-    DELETE FROM cleanings  
-    WHERE id = :id AND owner = :owner  
-    RETURNING id;  
+    DELETE FROM cleanings
+    WHERE id = :id AND owner = :owner
+    RETURNING id;
 """
 
 

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 
 # from starlette.middleware.cors import CORSMiddleware
 # TODO
-""" 
+"""
 About starlette
 FastAPI is built on top of starlette more info https://www.starlette.io/
 """
@@ -19,8 +19,8 @@ from app.core import config, tasks
 
 def get_application():
     app = FastAPI(title=config.PROJECT_NAME, version=config.VERSION)
-    """ 
-    This is a factory functions which returns FastAppi app with cors middleware configured 
+    """
+    This is a factory functions which returns FastAppi app with cors middleware configured
     About cors You can read more here: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
     """
 

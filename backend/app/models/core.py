@@ -21,7 +21,7 @@ class DateTimeModelMixin(BaseModel):
     updated_at: Optional[datetime]
 
     """
-    feature - the validator decorator - to set a default datetime for both the created_at and updated_at fields. 
+    feature - the validator decorator - to set a default datetime for both the created_at and updated_at fields.
     https://pydantic-docs.helpmanual.io/usage/validators/
     """
 

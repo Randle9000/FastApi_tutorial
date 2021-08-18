@@ -18,7 +18,7 @@ Answer:
     Public - attributes present on public facing resources being returned from GET, POST, and PUT requests
 And that pattern might be used in different places for almost every resource
 
-And the models should corresponds to the tables created in DB 
+And the models should corresponds to the tables created in DB
 (Compare to the code in migration/versions
 """
 
